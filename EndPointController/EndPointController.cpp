@@ -1,6 +1,6 @@
 // ----------------------------------------------------------------------------
 // EndPointController.cpp
-// Provides a library for setting the default audio renderer and other nice things.
+// Provides a library for setting the default audio renderer and a few other nice things.
 // Originally found on http://www.daveamenta.com/2011-05/programmatically-or-command-line-change-the-default-sound-playback-device-in-windows-7/
 // Rewritten into DLL form by Aaron Brooks, 2012.
 // ----------------------------------------------------------------------------
@@ -12,7 +12,6 @@
 #include "windows.h"
 #include "Mmdeviceapi.h"
 #include "PolicyConfig.h"
-//#include "Propidl.h"
 #include "Functiondiscoverykeys_devpkey.h"
 
 __declspec(dllexport) HRESULT SetDefaultAudioPlaybackDevice(LPCWSTR devID)
@@ -31,6 +30,20 @@ __declspec(dllexport) HRESULT SetDefaultAudioPlaybackDevice(LPCWSTR devID)
 }
 
 __declspec(dllexport) LPCWSTR GetDeviceID(int deviceCount)
+{
+	LPWSTR wstrID = NULL;
+	IMMDeviceEnumerator *pEnum = NULL;
+	IMMDeviceCollection *pDevices;
+	IMMDevice *pDevice;
+
+	CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&pEnum);
+	pEnum->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &pDevices);
+	pDevices->Item(deviceCount, &pDevice);
+	pDevice->GetId(&wstrID);
+	return wstrID;
+}
+
+__declspec(dllexport) LPWSTR GetDeviceIDasLPWSTR(int deviceCount)
 {
 	LPWSTR wstrID = NULL;
 	IMMDeviceEnumerator *pEnum = NULL;
